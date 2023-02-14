@@ -1,5 +1,6 @@
 
 import json
+import os
 
 def load_json_files(*file_names):
     """ Receives one or mor file names and returns a list of 
@@ -39,6 +40,57 @@ def create_compiled_data(questions, topics, past_scores):
 
     return compiled_data
 
+def clear():
+    """ Clears the terminal"""
+    #this is a shorthand if statement. if the OS is Windows os.name
+    arg = 'cis' if os.name == 'nt' else 'clear'
+    os.system(arg)
+
+def print_welcome_page(compiled_data):
+    """ Takes in compiled_data and does some formating to print it out correctly"""
+
+    table_titles = ['topic', 'questions', 'previous score']
+    #Define the length fo the longest title(for table sizing later)
+    max_length = len(max(table_titles, key=len))
+    #Compare max title length to topics length to determine which one
+    for value in compiled_data.values():
+        if len(value['topic']) + 4 > max_length:
+            max_length = len(value['topic']) + 4
+            #the +4 is the numbers . and spaces
+    print('Welcome to your Python Learninng App!\n')
+    print('Select a topic to review and you will be asked a max of 10 questions')
+
+    #Print table titles
+    print('| {0:^{max_length}} | {1:^{max_length}} | {2:^{max_length}}'
+          .format(
+            table_titles[0].title(),
+            table_titles[1].title(),
+            table_titles[2].title(),
+            max_length=max_length)
+          )
+    for key, value in compiled_data.items():
+        print('| {0:{max_length}} | {1:^{max_length}} | {2:^{max_length}} |'
+            .format(
+                f'{key}. {value["topic"].title()}',
+                value['questions-count'],
+                value.get('past-score', '') or '',
+                max_length=max_length)
+            )
+
+def validated_input(prompt, valid_options, value_to_quit='q'):
+
+    #Prompt the user for input
+    user_input = input(prompt)
+    #Iterate thru the while loop until the user_input is valid
+    flag = True
+    while flag:
+        if user_input == value_to_quit:
+            raise SystemExit
+        elif user_input not in valid_options:
+            user_input = input(f'Please enter a valid option or \'{value_to_quit}\' to quit: ')
+        else:
+            return user_input
+
 def main():
     """ Runs main code """
 
@@ -50,7 +102,11 @@ def main():
 
     compiled_data = create_compiled_data(questions, topics, past_scores)
 
-    print(compiled_data)
+    clear()
+
+    print_welcome_page(compiled_data)
+
+    topic_id = validate_input('\nEnter the number of the topic you want to review (\'q\' to quit): ', list(compiled_data.keys()))
 
 if __name__ == '__main__':
     main()
